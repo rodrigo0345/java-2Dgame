@@ -1,15 +1,13 @@
 package org.example;
 
-import org.example.engine.Renderer;
-import org.example.engine.Shader;
-import org.example.engine.VertexArray;
-import org.example.engine.Window;
+import org.example.engine.*;
 import org.example.engine.buffers.BufferElement;
 import org.example.engine.buffers.BufferLayout;
 import org.example.engine.buffers.IndexBuffer;
 import org.example.engine.buffers.VertexBuffer;
 import org.example.engine.cameras.Camera;
 import org.example.engine.cameras.Orthographic;
+import org.joml.Vector3f;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
@@ -28,7 +26,8 @@ public class HelloWorld {
 
     // The window handle (not used in the current code)
     private static Window window;
-    private int width, height;
+    private static Vector3f cameraPosition = new Vector3f();
+    private static Camera camera;
 
     // Method to run the application
     public static void run() {
@@ -98,11 +97,14 @@ public class HelloWorld {
 
         Shader shader = new Shader(vertexShader, fragmentShader);
         float aspectRatio = window.GetAspectRatio();
-        Camera camera = new Orthographic(-aspectRatio, aspectRatio, -1.0f, 1.0f);
+        camera = new Orthographic(-aspectRatio, aspectRatio, -1.0f, 1.0f);
 
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(window.GetInternalWindow()) ) {
+            Timestamp.UpdateDeltaTime();
+            ProcessInput();
+
             Renderer.Clear();
             Renderer.SetClearColor(.13f, .12f, .14f, .0f);
 
@@ -114,6 +116,23 @@ public class HelloWorld {
         }
 
         window.Close();
+    }
+
+    public static void ProcessInput(){
+        if(Input.IsKeyPressed(window, GLFW_KEY_W)){
+            cameraPosition.y += (float) 5f * Timestamp.GetDeltaTime();
+        }
+        if(Input.IsKeyPressed(window, GLFW_KEY_S)){
+            cameraPosition.y -= (float)5 * Timestamp.GetDeltaTime();
+        }
+        if(Input.IsKeyPressed(window, GLFW_KEY_A)){
+            cameraPosition.x -= (float)5 * Timestamp.GetDeltaTime();
+        }
+        if(Input.IsKeyPressed(window, GLFW_KEY_D)){
+            cameraPosition.x += (float)5 * Timestamp.GetDeltaTime();
+        }
+
+        camera.SetPosition(cameraPosition);
     }
 
     // Main method to start the application
