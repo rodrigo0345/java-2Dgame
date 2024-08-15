@@ -33,8 +33,7 @@ public class Window {
             throw new IllegalStateException("Unable to initialize GLFW");
         }
 
-        Window win = new Window(width, height, title);
-        return win;
+        return new Window(width, height, title);
     }
 
     public long GetInternalWindow() {

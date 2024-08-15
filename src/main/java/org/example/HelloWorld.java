@@ -7,6 +7,7 @@ import org.example.engine.buffers.IndexBuffer;
 import org.example.engine.buffers.VertexBuffer;
 import org.example.engine.cameras.Camera;
 import org.example.engine.cameras.Orthographic;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
@@ -28,6 +29,8 @@ public class HelloWorld {
     private static Window window;
     private static Vector3f cameraPosition = new Vector3f();
     private static Camera camera;
+    private static Vector2f spriteCoords = new Vector2f();
+    private static Vector2f oldSpriteCoords = new Vector2f();
 
     // Method to run the application
     public static void run() {
@@ -48,11 +51,19 @@ public class HelloWorld {
 
         VertexArray vao = new VertexArray();
         vao.Bind();
+
+        Texture tex = new Texture("assets/Zombie.png");
+
+        float texX = spriteCoords.x * 32 / (float) tex.getWidth();
+        float texY = spriteCoords.y * 32 / (float) tex.getHeight();
+        float texWidth = 32 / (float) tex.getWidth();
+        float texHeight = 32 / (float) tex.getHeight();
+
         float[] quad = {
-                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-                0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
-                0.5f, 0.5f, 0.0f,   1.0f, 1.0f,
-                -0.5f, 0.5f, 0.0f,  0.0f, 1.0f
+                -0.5f, -0.5f, 0.0f, texX, texY,
+                0.5f, -0.5f, 0.0f,  texX + texWidth, texY,
+                0.5f, 0.5f, 0.0f,   texX + texWidth, texY + texHeight,
+                -0.5f, 0.5f, 0.0f,  texX, texY + texHeight
         };
         int[] indices = {
                 0, 1, 2, 2, 3, 0
@@ -89,13 +100,16 @@ public class HelloWorld {
 
           layout(location = 0) out vec4 o_Color;
           in vec2 v_TexCoord;
+          uniform sampler2D u_Texture;
 
           void main() {
-            o_Color = vec4(v_TexCoord, 0.0, 1.0f);
+            o_Color = texture(u_Texture, v_TexCoord);
           }
         """;
 
         Shader shader = new Shader(vertexShader, fragmentShader);
+        tex.bind(0);
+        shader.uploadUniformInt("u_Texture", tex.getSlot());
         float aspectRatio = window.GetAspectRatio();
         camera = new Orthographic(-aspectRatio, aspectRatio, -1.0f, 1.0f);
 
@@ -108,7 +122,35 @@ public class HelloWorld {
             Renderer.Clear();
             Renderer.SetClearColor(.13f, .12f, .14f, .0f);
 
+            vao.Destroy();
+            vao = new VertexArray();
+            vao.Bind();
+
+            float xFloored = (float)Math.floor(spriteCoords.x);
+            float yFloored = (float)Math.floor(spriteCoords.y);
+
+            texX = Math.max(xFloored, oldSpriteCoords.x) * 32 / (float) tex.getWidth();
+            texY = Math.max(yFloored, oldSpriteCoords.y) * 32 / (float) tex.getHeight();
+            texWidth = 32 / (float) tex.getWidth();
+            texHeight = 32 / (float) tex.getHeight();
+            oldSpriteCoords.x = xFloored;
+            oldSpriteCoords.y = yFloored;
+
+            quad = new float[]{
+                    -0.5f, -0.5f, 0.0f, texX, texY,
+                    0.5f, -0.5f, 0.0f, texX + texWidth, texY,
+                    0.5f, 0.5f, 0.0f, texX + texWidth, texY + texHeight,
+                    -0.5f, 0.5f, 0.0f, texX, texY + texHeight
+            };
+
+            vb.Destroy();
+            vb = new VertexBuffer(quad);
+            vb.SetLayout(layout);
+            vao.AddVertexBuffer(vb);
+            vao.SetIndexBuffer(ib);
+
             Renderer.BeginScene(camera);
+            tex.bind(0);
             Renderer.Submit(vao, shader);
             Renderer.EndScene();
 
@@ -130,6 +172,16 @@ public class HelloWorld {
         }
         if(Input.IsKeyPressed(window, GLFW_KEY_D)){
             cameraPosition.x += (float)5 * Timestamp.GetDeltaTime();
+        }
+        if(Input.IsKeyPressed(window, GLFW_KEY_RIGHT)){
+            spriteCoords.x += 4 * Timestamp.GetDeltaTime();
+        } else if(Input.IsKeyPressed(window, GLFW_KEY_LEFT)){
+            spriteCoords.x -= 4 * Timestamp.GetDeltaTime();
+        }
+        if(Input.IsKeyPressed(window, GLFW_KEY_UP)){
+            spriteCoords.y += 4 * Timestamp.GetDeltaTime();
+        } else if(Input.IsKeyPressed(window, GLFW_KEY_DOWN)){
+            spriteCoords.y -= 4 * Timestamp.GetDeltaTime();
         }
 
         camera.SetPosition(cameraPosition);
