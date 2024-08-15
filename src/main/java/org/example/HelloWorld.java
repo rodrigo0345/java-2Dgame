@@ -47,6 +47,7 @@ public class HelloWorld {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities();
+        Renderer.Init();
         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
         VertexArray vao = new VertexArray();
@@ -60,10 +61,10 @@ public class HelloWorld {
         float texHeight = 32 / (float) tex.getHeight();
 
         float[] quad = {
-                -0.5f, -0.5f, 0.0f, texX, texY,
-                0.5f, -0.5f, 0.0f,  texX + texWidth, texY,
-                0.5f, 0.5f, 0.0f,   texX + texWidth, texY + texHeight,
-                -0.5f, 0.5f, 0.0f,  texX, texY + texHeight
+                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+                0.5f, -0.5f, 0.0f,  1.0f, 0.0f,
+                0.5f, 0.5f, 0.0f,   1.0f, 1.0f,
+                -0.5f, 0.5f, 0.0f,  0.0f, 1.0f
         };
         int[] indices = {
                 0, 1, 2, 2, 3, 0
@@ -174,14 +175,14 @@ public class HelloWorld {
             cameraPosition.x += (float)5 * Timestamp.GetDeltaTime();
         }
         if(Input.IsKeyPressed(window, GLFW_KEY_RIGHT)){
-            spriteCoords.x += 4 * Timestamp.GetDeltaTime();
+            spriteCoords.x += 5 * Timestamp.GetDeltaTime();
         } else if(Input.IsKeyPressed(window, GLFW_KEY_LEFT)){
-            spriteCoords.x -= 4 * Timestamp.GetDeltaTime();
+            spriteCoords.x -= 5 * Timestamp.GetDeltaTime();
         }
         if(Input.IsKeyPressed(window, GLFW_KEY_UP)){
-            spriteCoords.y += 4 * Timestamp.GetDeltaTime();
+            spriteCoords.y += 5 * Timestamp.GetDeltaTime();
         } else if(Input.IsKeyPressed(window, GLFW_KEY_DOWN)){
-            spriteCoords.y -= 4 * Timestamp.GetDeltaTime();
+            spriteCoords.y -= 5 * Timestamp.GetDeltaTime();
         }
 
         camera.SetPosition(cameraPosition);

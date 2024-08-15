@@ -6,8 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL45.glBindTextureUnit;
-import static org.lwjgl.opengl.GL45.glTextureStorage2D;
+import static org.lwjgl.opengl.GL45.*;
 import static org.lwjgl.stb.STBImage.*;
 
 public class Texture {
@@ -22,14 +21,6 @@ public class Texture {
 
     private int loadTexture(String filepath) {
         // Create a texture ID
-        int textureID = glGenTextures();
-        glBindTexture(GL_TEXTURE_2D, textureID);
-
-        // Set texture parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         int internalFormat = GL_RGB;
         int dataFormat = GL_RGB;
@@ -52,14 +43,23 @@ public class Texture {
             this.height = height.get();
 
             if (channels.get() == 4) {
-                internalFormat = GL_RGBA;
+                internalFormat = GL_RGBA8;
                 dataFormat = GL_RGBA;
+            } else if (channels.get() == 3) {
+                internalFormat = GL_RGBA8;
+                dataFormat = GL_RGB;
             }
         }
 
+        int textureID = glCreateTextures(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, textureID);
 
-        // Upload image data to texture
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, imageBuffer);
+        // Set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glTextureStorage2D(textureID, 1, internalFormat, width, height);
+        glTextureSubImage2D(textureID, 0, 0, 0, width, height, dataFormat, GL_UNSIGNED_BYTE, imageBuffer);
 
         // Free image memory
         stbi_image_free(imageBuffer);
