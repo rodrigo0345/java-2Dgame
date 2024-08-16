@@ -62,6 +62,19 @@ public class Orthographic implements Camera {
         Matrix4f transform = new Matrix4f().translate(m_Position)
                 .rotateY((float)Math.toRadians(m_Rotation));
         viewMatrix = transform.invert();
+        projectionMatrix = new Matrix4f();
         cache_ProjectionViewMatrix = projectionMatrix.mul(viewMatrix);
+    }
+
+    @Override
+    public void LookAt(Vector3f target) {
+        Vector3f direction = new Vector3f(target).sub(m_Position);
+        direction.y = 0; // We only care about the horizontal direction for orthographic
+
+        // Calculate angle
+        float angle = (float) Math.atan2(direction.z, direction.x);
+        angle = (float) Math.toDegrees(angle);
+
+        SetRotation(angle);
     }
 }

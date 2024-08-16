@@ -10,6 +10,7 @@ public interface Camera {
     Matrix4f GetProjectionViewMatrix();
     Vector3f GetPosition();
     void SetPosition(Vector3f position);
+    void LookAt(Vector3f lookAt);
     Vector3f GetRotation();
     void SetRotation(float rotationY);
     void SetProjectionMatrix(float left, float right, float top, float bottom);

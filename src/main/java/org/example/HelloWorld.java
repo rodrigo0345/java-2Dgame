@@ -7,21 +7,15 @@ import org.example.engine.buffers.IndexBuffer;
 import org.example.engine.buffers.VertexBuffer;
 import org.example.engine.cameras.Camera;
 import org.example.engine.cameras.Orthographic;
+import org.example.game.GameEngine;
+import org.example.game.characters.Zombie;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL11;
-
-
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-
-import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.system.MemoryStack.*;
-import static org.lwjgl.system.MemoryUtil.*;
 
 public class HelloWorld {
 
@@ -35,9 +29,47 @@ public class HelloWorld {
     // Method to run the application
     public static void run() {
         // Initialize the window
-        window = Window.InitWindow(1024, 720, "Some name");
+        window = Window.InitWindow(1024, 720, "Zombie Survival");
         window.Use();
-        loop();
+        // loop();
+        loopNew();
+    }
+
+    private static void loopNew(){
+        Renderer.Init();
+
+        camera = new Orthographic(-window.GetAspectRatio(), window.GetAspectRatio(), 1.0f, -1.0f);
+        GameEngine game = new GameEngine();
+
+        Zombie zombie = new Zombie(new Vector3f(0.0f, 0.0f, 0.0f));
+        Zombie zombie2 = new Zombie(new Vector3f(0.3f, 1.0f, 0.0f));
+        Zombie zombie3 = new Zombie(new Vector3f(-.3f, -1.0f, 0.0f));
+        game.AddEntity(zombie);
+        game.AddEntity(zombie2);
+        game.AddEntity(zombie3);
+
+        while (!window.shouldClose()){
+            Timestamp.UpdateDeltaTime();
+            Renderer.Clear();
+            Renderer.SetClearColor(.13f, .12f, .14f, .0f);
+
+            ProcessInput();
+
+            zombie2.Idle();
+
+            try{
+                Vector3f zombieFollowCameraVec = (Vector3f) cameraPosition.clone();
+                zombie.setPosition(zombieFollowCameraVec);
+            } catch (Exception e){
+            }
+
+            Renderer.BeginScene(camera);
+            game.DrawEntities();
+            Renderer.EndScene();
+
+            window.OnUpdate(camera);
+        }
+        window.Close();
     }
 
     private static void loop() {
@@ -55,10 +87,6 @@ public class HelloWorld {
 
         Texture tex = new Texture("assets/Zombie.png");
 
-        float texX = spriteCoords.x * 32 / (float) tex.getWidth();
-        float texY = spriteCoords.y * 32 / (float) tex.getHeight();
-        float texWidth = 32 / (float) tex.getWidth();
-        float texHeight = 32 / (float) tex.getHeight();
 
         float[] quad = {
                 -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
@@ -72,7 +100,7 @@ public class HelloWorld {
         VertexBuffer vb = new VertexBuffer(quad);
         IndexBuffer ib = new IndexBuffer(indices);
         BufferLayout layout = new BufferLayout(
-                new ArrayList<BufferElement>(
+                new ArrayList<>(
                         Arrays.asList(
                                 new BufferElement("a_Position", BufferElement.ShaderDataType.Float3, false),
                                 new BufferElement("a_TexCoord", BufferElement.ShaderDataType.Float2, false)
@@ -90,9 +118,10 @@ public class HelloWorld {
     
               out vec2 v_TexCoord;
               uniform mat4 u_ViewProjection;
+              uniform vec4 u_SpriteIndex;
     
               void main() {
-                v_TexCoord = a_TexCoord;
+                v_TexCoord = a_TexCoord * u_SpriteIndex.zw + u_SpriteIndex.xy;
                 gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
               }
         """;
@@ -111,8 +140,10 @@ public class HelloWorld {
         Shader shader = new Shader(vertexShader, fragmentShader);
         tex.bind(0);
         shader.uploadUniformInt("u_Texture", tex.getSlot());
+
         float aspectRatio = window.GetAspectRatio();
         camera = new Orthographic(-aspectRatio, aspectRatio, -1.0f, 1.0f);
+
 
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
@@ -123,36 +154,21 @@ public class HelloWorld {
             Renderer.Clear();
             Renderer.SetClearColor(.13f, .12f, .14f, .0f);
 
-            vao.Destroy();
-            vao = new VertexArray();
-            vao.Bind();
-
             float xFloored = (float)Math.floor(spriteCoords.x);
             float yFloored = (float)Math.floor(spriteCoords.y);
 
-            texX = Math.max(xFloored, oldSpriteCoords.x) * 32 / (float) tex.getWidth();
-            texY = Math.max(yFloored, oldSpriteCoords.y) * 32 / (float) tex.getHeight();
-            texWidth = 32 / (float) tex.getWidth();
-            texHeight = 32 / (float) tex.getHeight();
+            float texX = Math.max(xFloored, oldSpriteCoords.x) * 32 / (float) tex.getWidth();
+            float texY = Math.max(yFloored, oldSpriteCoords.y) * 32 / (float) tex.getHeight();
+            float texWidth = 32 / (float) tex.getWidth();
+            float texHeight = 32 / (float) tex.getHeight();
+
             oldSpriteCoords.x = xFloored;
             oldSpriteCoords.y = yFloored;
 
-            quad = new float[]{
-                    -0.5f, -0.5f, 0.0f, texX, texY,
-                    0.5f, -0.5f, 0.0f, texX + texWidth, texY,
-                    0.5f, 0.5f, 0.0f, texX + texWidth, texY + texHeight,
-                    -0.5f, 0.5f, 0.0f, texX, texY + texHeight
-            };
-
-            vb.Destroy();
-            vb = new VertexBuffer(quad);
-            vb.SetLayout(layout);
-            vao.AddVertexBuffer(vb);
-            vao.SetIndexBuffer(ib);
-
             Renderer.BeginScene(camera);
             tex.bind(0);
-            Renderer.Submit(vao, shader);
+            shader.uploadUniformFloat4("u_SpriteIndex", texX, texY, texWidth, texHeight);
+            // Renderer.Submit(vao, shader);
             Renderer.EndScene();
 
             window.OnUpdate(camera);
@@ -163,26 +179,16 @@ public class HelloWorld {
 
     public static void ProcessInput(){
         if(Input.IsKeyPressed(window, GLFW_KEY_W)){
-            cameraPosition.y += (float) 5f * Timestamp.GetDeltaTime();
+            cameraPosition.y += (float) 3f * Timestamp.GetDeltaTime();
         }
         if(Input.IsKeyPressed(window, GLFW_KEY_S)){
-            cameraPosition.y -= (float)5 * Timestamp.GetDeltaTime();
+            cameraPosition.y -= (float)3 * Timestamp.GetDeltaTime();
         }
         if(Input.IsKeyPressed(window, GLFW_KEY_A)){
-            cameraPosition.x -= (float)5 * Timestamp.GetDeltaTime();
+            cameraPosition.x -= (float)3 * Timestamp.GetDeltaTime();
         }
         if(Input.IsKeyPressed(window, GLFW_KEY_D)){
-            cameraPosition.x += (float)5 * Timestamp.GetDeltaTime();
-        }
-        if(Input.IsKeyPressed(window, GLFW_KEY_RIGHT)){
-            spriteCoords.x += 5 * Timestamp.GetDeltaTime();
-        } else if(Input.IsKeyPressed(window, GLFW_KEY_LEFT)){
-            spriteCoords.x -= 5 * Timestamp.GetDeltaTime();
-        }
-        if(Input.IsKeyPressed(window, GLFW_KEY_UP)){
-            spriteCoords.y += 5 * Timestamp.GetDeltaTime();
-        } else if(Input.IsKeyPressed(window, GLFW_KEY_DOWN)){
-            spriteCoords.y -= 5 * Timestamp.GetDeltaTime();
+            cameraPosition.x += (float)3 * Timestamp.GetDeltaTime();
         }
 
         camera.SetPosition(cameraPosition);

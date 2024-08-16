@@ -1,5 +1,6 @@
 package org.example.engine;
 import org.example.engine.cameras.Camera;
+import org.example.game.entities.EntityInterface;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
@@ -36,8 +37,10 @@ public class Renderer {
     private static SceneData sceneData = new SceneData();
 
     public static void Init(){
+        GL.createCapabilities();
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
     }
 
     public static void Clear() {
@@ -59,20 +62,27 @@ public class Renderer {
 
     public static void EndScene(){}
 
-    public static void Submit(VertexArray vao, Shader shader){
+    public static void Submit(EntityInterface entity){
+
+        Shader shader = entity.getShader();
+        VertexArray vao = entity.getVao();
+        float[] transformData = entity.getTransform();
+
         shader.bind();
 
-        float[] data = new float[16]; // A 4x4 matrix has 16 elements
+        float[] vpData = new float[16]; // A 4x4 matrix has 16 elements
         try (MemoryStack stack = MemoryStack.stackPush()) {
             // Allocate a float buffer with 16 floats on the stack
             FloatBuffer buffer = stack.mallocFloat(16);
             // Put the matrix data into the buffer
             sceneData.ProjectionViewMatrix.get(buffer);
             // Extract the data from the buffer into the array
-            buffer.get(data);
+            buffer.get(vpData);
+
         }
 
-        shader.uploadUniformMat4("u_ViewProjection", data);
+        shader.uploadUniformMat4("u_ViewProjection", vpData);
+        shader.uploadUniformMat4("u_Transform", transformData);
         Renderer.DrawIndexed(vao);
     }
 

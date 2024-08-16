@@ -91,6 +91,10 @@ public class Window {
         setupResizeCallback();
     }
 
+    public boolean shouldClose(){
+        return glfwWindowShouldClose(m_WindowHandle);
+    }
+
     public void OnUpdate(Camera camera){
         camera.SetProjectionMatrix(-GetAspectRatio(), GetAspectRatio(), 1.0f, -1.0f);
         glfwSwapBuffers(m_WindowHandle); // swap the color buffers
