@@ -3,8 +3,6 @@ package org.example.game.animations;
 import org.example.engine.type.Pair;
 
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ActionList {
     // e.g. "walk" -> 8 horizontal sprites
@@ -24,7 +22,7 @@ public class ActionList {
 
     private Integer get(String key){
         return actions.stream().parallel().filter(action -> {
-            return action.Key == key;
+            return action.Key.equals(key);
         }).findFirst().orElseThrow().Value;
     }
 

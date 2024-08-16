@@ -15,4 +15,5 @@ public interface EntityInterface {
     public Boolean isColliding(Entity box);
     public void draw();
     public void setPosition(Vector3f position);
+    public void resetAnimation();
 }

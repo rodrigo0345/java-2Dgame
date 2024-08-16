@@ -3,20 +3,16 @@ package org.example.game.characters;
 import org.example.engine.*;
 import org.example.engine.type.Pair;
 import org.example.game.*;
-import org.example.game.animations.ActionData;
 import org.example.game.animations.ActionList;
 import org.example.game.animations.Animation;
 import org.example.game.entities.Entity;
 import org.example.game.entities.EntityInterface;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 public class Zombie implements EntityInterface {
 
@@ -140,5 +136,11 @@ public class Zombie implements EntityInterface {
         animation.SetState("walk");
         frameCounter += animationSpeed * (float)Timestamp.GetDeltaTime();
         animation.SetCurrentSpriteFrame(frameCounter);
+    }
+
+    @Override
+    public void resetAnimation() {
+        // default
+        Idle();
     }
 }

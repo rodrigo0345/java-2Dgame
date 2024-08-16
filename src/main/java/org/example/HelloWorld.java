@@ -22,9 +22,11 @@ public class HelloWorld {
     // The window handle (not used in the current code)
     private static Window window;
     private static Vector3f cameraPosition = new Vector3f();
+    private static Vector3f oldCameraPosition = new Vector3f();
     private static Camera camera;
     private static Vector2f spriteCoords = new Vector2f();
     private static Vector2f oldSpriteCoords = new Vector2f();
+    private static boolean isAttacking = false;
 
     // Method to run the application
     public static void run() {
@@ -38,12 +40,18 @@ public class HelloWorld {
     private static void loopNew(){
         Renderer.Init();
 
-        camera = new Orthographic(-window.GetAspectRatio(), window.GetAspectRatio(), 1.0f, -1.0f);
+        camera = new Orthographic(window, -window.GetAspectRatio(), window.GetAspectRatio(), 1.0f, -1.0f);
         GameEngine game = new GameEngine();
 
+        ArrayList<Zombie> zombies = new ArrayList<>();
         Zombie zombie = new Zombie(new Vector3f(0.0f, 0.0f, 0.0f));
         Zombie zombie2 = new Zombie(new Vector3f(0.3f, 1.0f, 0.0f));
         Zombie zombie3 = new Zombie(new Vector3f(-.3f, -1.0f, 0.0f));
+
+        zombies.add(zombie);
+        zombies.add(zombie2);
+        zombies.add(zombie3);
+
         game.AddEntity(zombie);
         game.AddEntity(zombie2);
         game.AddEntity(zombie3);
@@ -55,13 +63,19 @@ public class HelloWorld {
 
             ProcessInput();
 
-            zombie2.Idle();
+            for(Zombie z: zombies){
+                z.resetAnimation();
+            }
 
             try{
-                Vector3f zombieFollowCameraVec = (Vector3f) cameraPosition.clone();
-                zombie.setPosition(zombieFollowCameraVec);
+                if(oldCameraPosition.equals(cameraPosition)) {}
+                else {
+                    oldCameraPosition = (Vector3f) cameraPosition.clone();
+                    zombie.setPosition(oldCameraPosition);
+                }
             } catch (Exception e){
             }
+
 
             Renderer.BeginScene(camera);
             game.DrawEntities();
@@ -142,7 +156,7 @@ public class HelloWorld {
         shader.uploadUniformInt("u_Texture", tex.getSlot());
 
         float aspectRatio = window.GetAspectRatio();
-        camera = new Orthographic(-aspectRatio, aspectRatio, -1.0f, 1.0f);
+        camera = new Orthographic(window, -aspectRatio, aspectRatio, -1.0f, 1.0f);
 
 
         // Run the rendering loop until the user has attempted to close
