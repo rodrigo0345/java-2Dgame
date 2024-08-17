@@ -2,19 +2,18 @@ package org.example.engine.buffers;
 
 public class BufferElement {
 
-    public enum ShaderDataType {
-        None,
-        Float,
-        Float2,
-        Float3,
-        Float4,
-        Mat3,
-        Mat4,
-        Int,
-        Int2,
-        Int3,
-        Int4,
-        Bool
+    public String Name;
+    public ShaderDataType Type;
+    public int Offset;
+    public int Size;
+    public boolean Normalized;
+
+    public BufferElement(String name, ShaderDataType type, boolean normalized) {
+        Name = name;
+        Type = type;
+        Offset = 0;
+        Size = ShaderDataTypeSize(type);
+        Normalized = normalized;
     }
 
     public static int ShaderDataTypeSize(ShaderDataType type) {
@@ -30,7 +29,7 @@ public class BufferElement {
         };
     }
 
-    public int GetComponentCount(){
+    public int GetComponentCount() {
         return switch (Type) {
             case None -> 0;
             case Float, Int -> 1;
@@ -43,13 +42,18 @@ public class BufferElement {
         };
     }
 
-    public String Name;
-    public ShaderDataType Type;
-    public int Offset;
-    public int Size;
-    public boolean Normalized;
-
-    public BufferElement(String name, ShaderDataType type, boolean normalized) {
-        Name = name; Type = type; Offset = 0; Size = ShaderDataTypeSize(type); Normalized = normalized;
+    public enum ShaderDataType {
+        None,
+        Float,
+        Float2,
+        Float3,
+        Float4,
+        Mat3,
+        Mat4,
+        Int,
+        Int2,
+        Int3,
+        Int4,
+        Bool
     }
 }

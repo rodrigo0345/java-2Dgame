@@ -1,6 +1,7 @@
-package org.example.engine;
+package org.example.engine.input;
 
-import org.lwjgl.opengl.GL;
+import org.example.engine.window.Window;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Input {

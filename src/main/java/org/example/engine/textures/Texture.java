@@ -1,19 +1,23 @@
-package org.example.engine;
+package org.example.engine.textures;
 
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
+
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.opengl.GL45.*;
-import static org.lwjgl.stb.STBImage.*;
+import static org.lwjgl.stb.STBImage.stbi_image_free;
 
 public class Texture {
-    private int id;
+    private final int id;
     private int width;
     private int height;
     private int slot = 0;
+    private final int repeatCount = 1;
 
     public Texture(String filepath) {
         id = loadTexture(filepath);
@@ -65,6 +69,10 @@ public class Texture {
         stbi_image_free(imageBuffer);
 
         return textureID;
+    }
+
+    public float getRepeadtCount() {
+        return repeatCount;
     }
 
     public void bind(int slot) {

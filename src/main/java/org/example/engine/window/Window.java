@@ -1,18 +1,15 @@
-package org.example.engine;
+package org.example.engine.window;
 
 import org.example.engine.cameras.Camera;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.opengl.GLUtil;
-import org.lwjgl.system.Callback;
-import org.lwjgl.system.MemoryStack;
-import org.lwjgl.opengl.GL;
 import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.glfw.Callbacks.*;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -20,25 +17,8 @@ public class Window {
     private long m_WindowHandle = 0L;
     private int m_Width;
     private int m_Height;
-    private String m_Title;
+    private final String m_Title;
     private boolean m_VsyncEnabled;
-
-    public static Window InitWindow(int width, int height, String title) {
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-
-        // Set all errors to be displayed in the System.err
-        GLFWErrorCallback.createPrint(System.err).set();
-
-        if (!glfwInit()) {
-            throw new IllegalStateException("Unable to initialize GLFW");
-        }
-
-        return new Window(width, height, title);
-    }
-
-    public long GetInternalWindow() {
-        return m_WindowHandle;
-    }
 
     private Window(int width, int height, String title) {
         assert width > 0 && height > 0 : "Width and Height cannot be negative";
@@ -91,11 +71,28 @@ public class Window {
         setupResizeCallback();
     }
 
-    public boolean shouldClose(){
+    public static Window InitWindow(int width, int height, String title) {
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+
+        // Set all errors to be displayed in the System.err
+        GLFWErrorCallback.createPrint(System.err).set();
+
+        if (!glfwInit()) {
+            throw new IllegalStateException("Unable to initialize GLFW");
+        }
+
+        return new Window(width, height, title);
+    }
+
+    public long GetInternalWindow() {
+        return m_WindowHandle;
+    }
+
+    public boolean shouldClose() {
         return glfwWindowShouldClose(m_WindowHandle);
     }
 
-    public void OnUpdate(Camera camera){
+    public void OnUpdate(Camera camera) {
         camera.SetProjectionMatrix(-GetAspectRatio(), GetAspectRatio(), 1.0f, -1.0f);
         glfwSwapBuffers(m_WindowHandle); // swap the color buffers
         glfwPollEvents();
@@ -130,7 +127,7 @@ public class Window {
     }
 
     public float GetAspectRatio() {
-        return (float)m_Width / (float)m_Height;
+        return (float) m_Width / (float) m_Height;
     }
 
     private void setupResizeCallback() {

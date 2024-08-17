@@ -1,26 +1,25 @@
 package org.example.engine.cameras;
 
-import org.example.engine.Window;
+import org.example.engine.window.Window;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
 
 public class Orthographic implements Camera {
+    private final Window window;
     private Matrix4f projectionMatrix = new Matrix4f();
     private Matrix4f viewMatrix = new Matrix4f();
     private Matrix4f cache_ProjectionViewMatrix = new Matrix4f();
     private Vector3f m_Position = new Vector3f();
     private float zoom = 5.0f;
     private float m_Rotation = 0.0f;
-    private final Window window;
 
-    public Orthographic(Window win, float left, float right, float top, float bottom){
+    public Orthographic(Window win, float left, float right, float top, float bottom) {
         projectionMatrix = new Matrix4f().ortho(left, right, bottom, top, -1.0f, 1.0f);
         cache_ProjectionViewMatrix = projectionMatrix.mul(viewMatrix);
         this.window = win;
     }
 
-    public void SetProjectionMatrix(float left, float right, float top, float bottom){
+    public void SetProjectionMatrix(float left, float right, float top, float bottom) {
         projectionMatrix = new Matrix4f().ortho(left, right, bottom, top, -1.0f, 1.0f);
         recalculateViewMatrix();
     }
@@ -70,7 +69,7 @@ public class Orthographic implements Camera {
         float bottom = -zoom;
 
         Matrix4f transform = new Matrix4f().translate(m_Position)
-                .rotateY((float)Math.toRadians(m_Rotation));
+                .rotateY((float) Math.toRadians(m_Rotation));
         viewMatrix = transform.invert();
 
         // Recalculate the projection matrix based on zoom and aspect ratio
@@ -79,6 +78,7 @@ public class Orthographic implements Camera {
         // Calculate the projection-view matrix
         cache_ProjectionViewMatrix = projectionMatrix.mul(viewMatrix);
     }
+
     public void SetZoom(float zoom) {
         this.zoom = zoom;
         recalculateViewMatrix();

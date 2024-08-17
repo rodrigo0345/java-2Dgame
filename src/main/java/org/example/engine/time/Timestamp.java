@@ -1,13 +1,13 @@
-package org.example.engine;
+package org.example.engine.time;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.glfwGetTime;
 
 public class Timestamp {
     public static double LastFrameTime = 0.0f;
     public static double DeltaTime = 0.0f;
     public static double CurrentFPS = 0.0f;
 
-    public static double UpdateDeltaTime(){
+    public static double UpdateDeltaTime() {
         double time = (float) glfwGetTime();
         DeltaTime = time - LastFrameTime;
         LastFrameTime = time;
@@ -15,7 +15,7 @@ public class Timestamp {
         return LastFrameTime;
     }
 
-    public static double GetDeltaTime(){
+    public static double GetDeltaTime() {
         return DeltaTime;
     }
 }

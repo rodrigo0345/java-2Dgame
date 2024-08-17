@@ -11,13 +11,15 @@ public class BufferLayout {
         CalculateOffsetsAndStrings();
     }
 
-    public List<BufferElement> GetElements(){ return m_Elements; }
+    public List<BufferElement> GetElements() {
+        return m_Elements;
+    }
 
-    void CalculateOffsetsAndStrings(){
+    void CalculateOffsetsAndStrings() {
         int offset = 0;
         m_Stride = 0;
 
-        for(BufferElement el: m_Elements){
+        for (BufferElement el : m_Elements) {
             el.Offset = offset;
             offset += el.Size;
             m_Stride += el.Size;
@@ -28,7 +30,7 @@ public class BufferLayout {
         return m_Stride;
     }
 
-    public int GetCount(){
+    public int GetCount() {
         return m_Elements.size();
     }
 }
