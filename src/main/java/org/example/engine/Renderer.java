@@ -1,5 +1,6 @@
 package org.example.engine;
 import org.example.engine.cameras.Camera;
+import org.example.game.collisions.CollidingBox;
 import org.example.game.entities.EntityInterface;
 import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL;
@@ -30,11 +31,12 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 
 public class Renderer {
+    public static boolean debug = true;
     private static class SceneData{
         Matrix4f ProjectionViewMatrix = new Matrix4f();
     }
 
-    private static SceneData sceneData = new SceneData();
+    private static final SceneData sceneData = new SceneData();
 
     public static void Init(){
         GL.createCapabilities();
@@ -68,8 +70,6 @@ public class Renderer {
         VertexArray vao = entity.getVao();
         float[] transformData = entity.getTransform();
 
-        shader.bind();
-
         float[] vpData = new float[16]; // A 4x4 matrix has 16 elements
         try (MemoryStack stack = MemoryStack.stackPush()) {
             // Allocate a float buffer with 16 floats on the stack
@@ -81,6 +81,12 @@ public class Renderer {
 
         }
 
+        if (debug) {
+            CollidingBox box = entity.getShape().GetCollidingBox();
+            box.draw(vpData, transformData);
+        }
+
+        shader.bind();
         shader.uploadUniformMat4("u_ViewProjection", vpData);
         shader.uploadUniformMat4("u_Transform", transformData);
         Renderer.DrawIndexed(vao);

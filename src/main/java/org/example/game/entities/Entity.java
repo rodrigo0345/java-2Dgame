@@ -12,24 +12,12 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.FloatBuffer;
 
 public class Entity extends Square {
-    private final Matrix4f ModelMatrix = new Matrix4f();
-    private Texture texture;
+    private Matrix4f ModelMatrix = new Matrix4f();
     private final Shape foundationShape;
     private final VertexArray vao = new VertexArray();
-    private final Shader shader = new Shader(defaultEntityVertexShader, defaultEntityFragmentShader);
+    private Shader shader = new Shader(defaultEntityVertexShader, defaultEntityFragmentShader);
 
-    // z and w represent the width and height of each sprite respectively
-    private Vector4f spriteIndex;
-
-    public Entity(Shape foundationShape, Texture texture){
-        this.foundationShape = foundationShape;
-        this.texture = texture;
-
-        vao.Bind();
-        foundationShape.Init(vao);
-    }
-
-    protected Entity(Shape foundationShape){
+    public Entity(Shape foundationShape) {
         this.foundationShape = foundationShape;
 
         vao.Bind();
@@ -42,6 +30,10 @@ public class Entity extends Square {
 
     public Matrix4f getModelMatrix(){
         return ModelMatrix;
+    }
+
+    public void resetModelMatrix() {
+        ModelMatrix = new Matrix4f();
     }
 
     // ------------------ Projection Matrix -----------------
@@ -62,6 +54,10 @@ public class Entity extends Square {
     }
     public VertexArray getVao() {return vao;}
     public Shader getShader() {return shader;}
+
+    public void setShader(Shader shader) {
+        this.shader = shader;
+    }
     // ------------------ Getters -----------------
 
     private final static String defaultEntityVertexShader = """

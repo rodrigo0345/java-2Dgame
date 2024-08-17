@@ -17,14 +17,15 @@ import java.util.ArrayList;
 public class Zombie implements EntityInterface {
 
     Texture texture = new Texture("assets/Zombie.png");
-    Entity entity = new Entity(new Square(), texture);
+    Entity entity = new Entity(new Square());
 
     Animation animation;
     float animationSpeed = 3.0f;
     float frameCounter = 0.0f;
 
     private Vector3f rotation = new Vector3f();
-    private Vector3f scale = new Vector3f();
+    private float rotationAngle = 0.0f;
+    private final Vector3f scale = new Vector3f(1.0f, 1.0f, 1.0f);
     private Vector3f translation = new Vector3f();
 
     private void InitializeAnimations() {
@@ -33,7 +34,7 @@ public class Zombie implements EntityInterface {
         ArrayList<Pair<String, Integer>> data = new ArrayList<>();
 
         data.add(new Pair<>("idle", 7));    // 0
-        data.add(new Pair<>("attack", 7));  // 1
+        data.add(new Pair<>("attack", 6));  // 1
         data.add(new Pair<>("walk", 7));    // 2
         data.add(new Pair<>("u_", 7));      // 3
         data.add(new Pair<>("y_", 7));      // 4
@@ -48,11 +49,10 @@ public class Zombie implements EntityInterface {
     }
 
     public Zombie(Vector3f spawnLocation) {
-        entity = new Entity(new Square(), texture);
+        entity = new Entity(new Square());
         entity.getVao().Bind();
-        texture = new Texture("assets/Zombie.png");
         translation = spawnLocation;
-        this.InitializeAnimations();;
+        this.InitializeAnimations();
     }
 
     public void Walk(Vector3f walkTo){
@@ -69,6 +69,9 @@ public class Zombie implements EntityInterface {
 
     public void Attack(){
         // TODO: Animate
+        animation.SetState("attack");
+        frameCounter += 5.0 * (float) Timestamp.GetDeltaTime();
+        animation.SetCurrentSpriteFrame(frameCounter);
     }
 
     public void Idle(){
@@ -98,13 +101,25 @@ public class Zombie implements EntityInterface {
         return null;
     }
 
+    public Matrix4f getTransformMat4() {
+        Matrix4f model = new Matrix4f().identity();
+
+        // Then, apply the rotation
+
+        // Finally, move the quad back to its original position
+        model.translate(translation);
+
+        // If scaling is needed, you can apply it here
+        model.scale(scale);
+
+        model.rotate((float) Math.toRadians(rotationAngle), rotation);
+
+        return model;
+    }
+
     @Override
     public float[] getTransform() {
-        Matrix4f model = new Matrix4f();
-        float angle = 0.0f;
-
-        model.scale(scale).rotation(angle, rotation).translate(translation);
-
+        Matrix4f model = getTransformMat4();
         float[] transformData = new float[16];
         try (MemoryStack stack = MemoryStack.stackPush()) {
             // Allocate a float buffer with 16 floats on the stack
@@ -130,8 +145,15 @@ public class Zombie implements EntityInterface {
         getShader().unbind();
     }
 
+
     @Override
     public void setPosition(Vector3f position) {
+        if ((position.x - this.translation.x) < 0) {
+            rotation = new Vector3f(0.0f, 1.0f, 0.0f);
+            rotationAngle = 180.0f;
+        } else {
+            rotationAngle = 0.0f;
+        }
         translation = position;
         animation.SetState("walk");
         frameCounter += animationSpeed * (float)Timestamp.GetDeltaTime();

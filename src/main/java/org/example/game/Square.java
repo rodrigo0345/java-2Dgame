@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 public class Square implements Shape {
 
-    private CollidingBox box = new CollidingBox(-0.5f, -0.5f, 0.5f, 0.5f);
+    private final CollidingBox box = new CollidingBox(-0.5f, -0.5f, 0.5f, 0.5f);
 
     private static final float[] vertexData = new float[]{
             // position coords  // texture coords
